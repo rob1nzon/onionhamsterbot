@@ -1,11 +1,14 @@
 
-
 let tg = window.Telegram.WebApp;
 let coins = 0;
+let liquidity = 0;
 const coinsDisplay = document.getElementById('coins');
+const liquidityDisplay = document.getElementById('liquidity');
 const onion = document.getElementById('onion');
 const userInfo = document.getElementById('user-info');
 const authButton = document.getElementById('auth-button');
+const addLiquidityButton = document.getElementById('add-liquidity');
+const removeLiquidityButton = document.getElementById('remove-liquidity');
 
 tg.expand();
 
@@ -55,9 +58,10 @@ async function saveUserData() {
     await fetch('/api/save-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, coins: coins })
+        body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, coins, liquidity })
     });
 }
+
 
 async function initGame() {
     const userData = await getUserData();
@@ -102,9 +106,17 @@ async function saveUserData() {
 
 async function initGame() {
     const userData = await getUserData();
-    coins = userData.coins || 0;
-    updateCoinsDisplay();
-    userInfo.textContent = `Привет, ${tg.initDataUnsafe.user.first_name}!`;
+    if (userData) {
+        coins = userData.coins || 0;
+        liquidity = userData.liquidity || 0;
+        updateDisplays();
+        onion.style.pointerEvents = 'auto';
+    }
+}
+
+function updateDisplays() {
+    coinsDisplay.textContent = `Луккоины: ${coins}`;
+    liquidityDisplay.textContent = `Ликвидность: ${liquidity}`;
 }
 
 function updateCoinsDisplay() {
@@ -113,11 +125,34 @@ function updateCoinsDisplay() {
 
 async function clickOnion() {
     coins++;
-    updateCoinsDisplay();
+    updateDisplays();
     createFloatingCoin();
     if (coins % 10 === 0) createBackgroundOnion();
     await saveUserData();
 }
+
+function addLiquidity() {
+    if (coins >= 10) {
+        coins -= 10;
+        liquidity++;
+        updateDisplays();
+        saveUserData();
+    } else {
+        alert('Недостаточно луккоинов для добавления ликвидности!');
+    }
+}
+
+function removeLiquidity() {
+    if (liquidity > 0) {
+        liquidity--;
+        coins += 9; // 10% комиссия при выводе ликвидности
+        updateDisplays();
+        saveUserData();
+    } else {
+        alert('У вас нет ликвидности для вывода!');
+    }
+}
+
 
 function createFloatingCoin() {
     const coin = document.createElement('div');
@@ -142,6 +177,8 @@ function createBackgroundOnion() {
 // ... (остальные функции остаются без изменений) ...
 
 onion.addEventListener('click', clickOnion);
+addLiquidityButton.addEventListener('click', addLiquidity);
+removeLiquidityButton.addEventListener('click', removeLiquidity);
 
 // Запускаем проверку авторизации при загрузке страницы
 checkAuthorization();
