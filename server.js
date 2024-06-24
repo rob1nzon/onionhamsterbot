@@ -89,12 +89,14 @@ app.post('/api/save-data', async (req, res) => {
   try {
     await client.query(
       q.Let(
-                 match: q.Match(q.Index('user_by_id'), userId)
+        {
+          match: q.Match(q.Index('user_by_id'), userId)
         },
         q.If(
           q.Exists(q.Var('match')),
           q.Update(q.Select('ref', q.Get(q.Var('match'))), { data: { coins, liquidity } }),
-          q.Create(q.Collection('users'), { data: { userI        )
+          q.Create(q.Collection('users'), { data: { userId, coins, liquidity } })
+        )
       )
     );
     res.json({ success: true });
@@ -103,6 +105,7 @@ app.post('/api/save-data', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
