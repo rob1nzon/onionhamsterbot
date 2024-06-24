@@ -1,3 +1,4 @@
+// server.js
 const express = require('express');
 const faunadb = require('faunadb');
 const path = require('path');
@@ -13,6 +14,41 @@ const client = new faunadb.Client({
 
 app.use(express.json());
 app.use(express.static('public'));
+
+// Функция для создания необходимых коллекций и индексов
+async function setupDatabase() {
+  try {
+    // Создаем коллекцию 'users', если она не существует
+    await client.query(
+      q.If(
+        q.Not(q.Exists(q.Collection('users'))),
+        q.CreateCollection({ name: 'users' }),
+        true
+      )
+    );
+
+    // Создаем индекс 'user_by_id', если он не существует
+    await client.query(
+      q.If(
+        q.Not(q.Exists(q.Index('user_by_id'))),
+        q.CreateIndex({
+          name: 'user_by_id',
+          source: q.Collection('users'),
+          terms: [{ field: ['data', 'userId'] }],
+          unique: true
+        }),
+        true
+      )
+    );
+
+    console.log('Database setup completed successfully');
+  } catch (error) {
+    console.error('Error setting up database:', error);
+  }
+}
+
+// Вызываем функцию настройки базы данных при запуске сервера
+setupDatabase();
 
 app.post('/api/user-data', async (req, res) => {
   const { userId } = req.body;
