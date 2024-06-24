@@ -105,3 +105,33 @@ h1 {
 #auth-button:hover {
     background-color: #45a049;
 }
+
+.liquidity-controls {
+    margin-top: 20px;
+}
+
+.liquidity-controls button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: background-color 0.3s;
+}
+
+.liquidity-controls button:hover {
+    background-color: #45a049;
+}
+
+#liquidity {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #1e88e5;
+    font-weight: bold;
+}
