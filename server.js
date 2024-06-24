@@ -75,11 +75,13 @@ app.post('/api/user-data', async (req, res) => {
         q.If(
           q.Exists(q.Var('match')),
           q.Get(q.Var('match')),
-          q.Create(q.Collection('users'), { data: { userId, coins: 0, liquidity: 0 }         )
+          q.Create(q.Collection('users'), { data: { userId, coins: 0, liquidity: 0 } })
+        )
       )
     );
     res.json(result.data);
-  }     console.error('Error fetching user data:', error);
+  } catch (error) {
+    console.error('Error fetching user data:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
